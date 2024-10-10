@@ -133,7 +133,7 @@ class LeggedRobot(BaseTask):
         if self.viewer and self.enable_viewer_sync and self.debug_viz:
             self._draw_debug_vis()
 
-        self._render_headless()
+        # self._render_headless()
 
     def check_termination(self):
         """ Check if environments need to be reset

@@ -30,8 +30,8 @@ def load_policy(logdir):
 
 
 def load_env(label, headless=False):
-    dirs = glob.glob(f"../runs/{label}/*")
-    logdir = sorted(dirs)[0]
+    dirs = glob.glob(f"./runs/{label}/*")
+    logdir = sorted(dirs)[-1]
 
     with open(logdir + "/parameters.pkl", 'rb') as file:
         pkl_cfg = pkl.load(file)
@@ -70,7 +70,7 @@ def load_env(label, headless=False):
 
     Cfg.domain_rand.lag_timesteps = 6
     Cfg.domain_rand.randomize_lag_timesteps = True
-    Cfg.control.control_type = "actuator_net"
+    Cfg.control.control_type = "P"
 
     from go1_gym.envs.wrappers.history_wrapper import HistoryWrapper
 
@@ -94,7 +94,7 @@ def play_go1(headless=True):
     import glob
     import os
 
-    label = "gait-conditioned-agility/pretrain-v0/train"
+    label = "gait-conditioned-agility/2024-10-09/train"
 
     env, policy = load_env(label, headless=headless)
 
@@ -114,6 +114,8 @@ def play_go1(headless=True):
     stance_width_cmd = 0.25
 
     measured_x_vels = np.zeros(num_eval_steps)
+    measured_y_vels = np.zeros(num_eval_steps)
+    measured_ang_vels = np.zeros(num_eval_steps)
     target_x_vels = np.ones(num_eval_steps) * x_vel_cmd
     joint_positions = np.zeros((num_eval_steps, 12))
 
@@ -136,11 +138,13 @@ def play_go1(headless=True):
         obs, rew, done, info = env.step(actions)
 
         measured_x_vels[i] = env.base_lin_vel[0, 0]
+        measured_y_vels[i] = env.base_lin_vel[0, 1]
+        measured_ang_vels[i] = env.base_ang_vel[0,2]
         joint_positions[i] = env.dof_pos[0, :].cpu()
 
     # plot target and measured forward velocity
     from matplotlib import pyplot as plt
-    fig, axs = plt.subplots(2, 1, figsize=(12, 5))
+    fig, axs = plt.subplots(4, 1, figsize=(12, 5))
     axs[0].plot(np.linspace(0, num_eval_steps * env.dt, num_eval_steps), measured_x_vels, color='black', linestyle="-", label="Measured")
     axs[0].plot(np.linspace(0, num_eval_steps * env.dt, num_eval_steps), target_x_vels, color='black', linestyle="--", label="Desired")
     axs[0].legend()
@@ -152,6 +156,18 @@ def play_go1(headless=True):
     axs[1].set_title("Joint Positions")
     axs[1].set_xlabel("Time (s)")
     axs[1].set_ylabel("Joint Position (rad)")
+
+    axs[2].plot(np.linspace(0, num_eval_steps * env.dt, num_eval_steps), measured_y_vels, color='black', linestyle="-", label="Measured")
+    axs[2].plot(np.linspace(0, num_eval_steps * env.dt, num_eval_steps), np.zeros(num_eval_steps), color='black', linestyle="--", label="Desired")
+    axs[2].set_title("Y Velocity")
+    axs[2].set_xlabel("Time (s)")
+    axs[2].set_ylabel("Velocity (m/s)")
+
+    axs[3].plot(np.linspace(0, num_eval_steps * env.dt, num_eval_steps), measured_ang_vels, color='black', linestyle="-", label="Measured")
+    axs[3].plot(np.linspace(0, num_eval_steps * env.dt, num_eval_steps), np.zeros(num_eval_steps), color='black', linestyle="--", label="Desired")
+    axs[3].set_title("Ang Velocity")
+    axs[3].set_xlabel("Time (s)")
+    axs[3].set_ylabel("Velocity (rad/s)")
 
     plt.tight_layout()
     plt.show()

@@ -77,7 +77,7 @@ Our initial release provides the following features:
 #### Install pytorch 1.10 with cuda-11.3:
 
 ```bash
-pip3 install torch==1.10.0+cu113 torchvision==0.11.1+cu113 torchaudio==0.10.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.6 -c pytorch -c nvidia
 ```
 
 #### Install Isaac Gym
@@ -95,7 +95,7 @@ pip3 install torch==1.10.0+cu113 torchvision==0.11.1+cu113 torchaudio==0.10.0+cu
 4. Verify the installation by try running an example
 
     ```bash
-    python examples/1080_balls_of_solitude.py
+    cd examples && python 1080_balls_of_solitude.py
     ```
 5. For troubleshooting check docs `isaacgym/docs/index.html`
 

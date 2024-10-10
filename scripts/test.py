@@ -8,12 +8,13 @@ from tqdm import trange
 from go1_gym.envs import *
 from go1_gym.envs.base.legged_robot_config import Cfg
 from go1_gym.envs.go1.go1_config import config_go1
+from go1_gym.envs.go1.aliengo_config import config_aliengo
 from go1_gym.envs.go1.velocity_tracking import VelocityTrackingEasyEnv
 
 
 def run_env(render=False, headless=False):
     # prepare environment
-    config_go1(Cfg)
+    config_aliengo(Cfg)
 
     Cfg.commands.num_lin_vel_bins = 30
     Cfg.commands.num_ang_vel_bins = 30
@@ -183,7 +184,7 @@ def run_env(render=False, headless=False):
 
     Cfg.domain_rand.lag_timesteps = 6
     Cfg.domain_rand.randomize_lag_timesteps = True
-    Cfg.control.control_type = "actuator_net"
+    Cfg.control.control_type = "P"
 
     env = VelocityTrackingEasyEnv(sim_device='cuda:0', headless=False, cfg=Cfg)
     env.reset()

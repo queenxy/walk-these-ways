@@ -118,7 +118,7 @@ def play_go1(headless=True):
     x_vel_cmd, y_vel_cmd, yaw_vel_cmd = 1.5, 0.0, 0.0
     body_height_cmd = 0.0
     step_frequency_cmd = 3.0
-    gait = torch.tensor(gaits["bounding"])
+    gait = torch.tensor(gaits["trotting"])
     footswing_height_cmd = 0.08
     pitch_cmd = 0.0
     roll_cmd = 0.0
@@ -134,16 +134,18 @@ def play_go1(headless=True):
     joint_positions = np.zeros((num_eval_steps, 12))
 
     obs = env.reset()
+    print(obs)
 
-    for i in range(100):
-        actions = torch.zeros(1, 12)
-        env.env.p_gains = 80.0
-        env.env.d_gains = 4.0
-        obs, rew, done, info = env.step(actions)
+    # for i in range(100):
+    #     actions = torch.zeros(1, 12)
+    #     env.env.p_gains = 80.0
+    #     env.env.d_gains = 4.0
+    #     obs, rew, done, info = env.step(actions)
 
     for i in tqdm(range(num_eval_steps)):
         with torch.no_grad():
             actions = policy(obs)
+        # print(actions)
         env.env.p_gains = 20.0
         env.env.d_gains = 0.5
         env.commands[:, 0] = x_vel_cmd #*i/num_eval_steps

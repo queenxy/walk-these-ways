@@ -9,11 +9,13 @@ o = data["states"]
 a = data["actions"]
 r = data["rews"]
 d = data["dones"]
+# print(o[0,0,-70:])
 
 def get_obs(obs):
     o = np.zeros(1170)
     for i in range(30):
-        o[i*39:(i+1)*39] = obs[i*70:i*70+39]
+        o[i*39:i*39+3] = obs[i*70:i*70+3]
+        o[i*39+3:(i+1)*39] = obs[i*70+18:i*70+54]
     return o
 
 count = 0
@@ -29,18 +31,23 @@ for j in range(data["states"].shape[1]):
     for i in range(data["states"].shape[0]):
         obs = get_obs(o[i,j,:])
         action = a[i,j,:]
+        action = np.clip(action, -10, 10)
+        action *= 0.1
         rew = r[i,j,0]
         done = d[i,j,0]
         if done == 0:
             tra_rew += rew
             tra_step += 1
-            tra_obs.append(obs)
-            tra_act.append(action)
+            if count > 50 and count < 65:
+                tra_obs.append(obs)
+                tra_act.append(action)
         elif done == 1:
             if tra_step > 500 and tra_rew > 3:
+                # print(tra_obs[0][-39:])
                 obs_buf += tra_obs
                 act_buf += tra_act
-                traj_lengths.append(tra_step)
+                if count > 50 and count < 65:
+                    traj_lengths.append(tra_step)
                 # print(tra_step)
                 # print(tra_rew)
                 # print(len(tra_obs))
@@ -52,6 +59,9 @@ for j in range(data["states"].shape[1]):
             tra_step = 0
             tra_obs = []
             tra_act = []
+
+            if count >= 65:
+                break
 
         else:
             print("Data Error")
@@ -66,4 +76,4 @@ print(obs_buf.shape)
 print(act_buf.shape)
 print(np.sum(traj_lengths))
 
-np.savez("trotting_clean.npz",states=obs_buf,actions=act_buf,images=None,traj_lengths=traj_lengths)
+np.savez("trotting_clean_50_scaled_val.npz",states=obs_buf,actions=act_buf,images=None,traj_lengths=traj_lengths)

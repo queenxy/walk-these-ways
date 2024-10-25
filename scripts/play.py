@@ -6,6 +6,7 @@ import numpy as np
 
 import glob
 import pickle as pkl
+import copy
 
 from go1_gym.envs import *
 from go1_gym.envs.base.legged_robot_config import Cfg
@@ -21,6 +22,14 @@ def load_policy(logdir, actor_critic):
 
     adaptation_module = actor_critic.adaptation_module
     body = actor_critic.actor_body
+
+    # jit_adaptation_module = copy.deepcopy(adaptation_module).to('cpu')
+    # traced_script_adaptation_module = torch.jit.script(jit_adaptation_module)
+    # traced_script_adaptation_module.save("adaptation_module.jit")
+
+    # jit_body = copy.deepcopy(body).to('cpu')
+    # traced_script_body = torch.jit.script(jit_body)
+    # traced_script_body.save("body.jit")
 
     def policy(obs, info={}):
         i = 0
@@ -90,6 +99,7 @@ def load_env(label, headless=False):
                                       env.num_actions,
                                       ).to("cpu")
     weights = torch.load(logdir + "/checkpoints/ac_weights_049999.pt")
+    # weights = torch.load("pretrained/ac_weights_040000.pt")
     actor_critic.load_state_dict(state_dict=weights)
 
     policy = load_policy(logdir,actor_critic)
@@ -105,7 +115,7 @@ def play_go1(headless=True):
     import glob
     import os
 
-    label = "gait-conditioned-agility/2024-10-24/train"
+    label = "gait-conditioned-agility/2024-10-25/train"
 
     env, policy = load_env(label, headless=headless)
 

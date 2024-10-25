@@ -38,16 +38,18 @@ for j in range(data["states"].shape[1]):
         if done == 0:
             tra_rew += rew
             tra_step += 1
-            if count > 50 and count < 65:
-                tra_obs.append(obs)
-                tra_act.append(action)
+            # if count > 50 and count < 65:
+            tra_obs.append(obs)
+            tra_act.append(action)
         elif done == 1:
             if tra_step > 500 and tra_rew > 3:
                 # print(tra_obs[0][-39:])
-                obs_buf += tra_obs
+                obs_for_delay = [tra_obs[0],tra_obs[0]]
+                obs_buf += obs_for_delay
+                obs_buf += tra_obs[:-2]
                 act_buf += tra_act
-                if count > 50 and count < 65:
-                    traj_lengths.append(tra_step)
+                # if count > 50 and count < 65:
+                traj_lengths.append(tra_step)
                 # print(tra_step)
                 # print(tra_rew)
                 # print(len(tra_obs))
@@ -60,7 +62,7 @@ for j in range(data["states"].shape[1]):
             tra_obs = []
             tra_act = []
 
-            if count >= 65:
+            if count >= 50:
                 break
 
         else:
@@ -76,4 +78,4 @@ print(obs_buf.shape)
 print(act_buf.shape)
 print(np.sum(traj_lengths))
 
-np.savez("trotting_clean_50_scaled_val.npz",states=obs_buf,actions=act_buf,images=None,traj_lengths=traj_lengths)
+np.savez("trotting_clean_50_scaled_delay_2.npz",states=obs_buf,actions=act_buf,images=None,traj_lengths=traj_lengths)

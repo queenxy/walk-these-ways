@@ -89,7 +89,7 @@ def load_env(label, headless=False):
                                       env.num_obs_history,
                                       env.num_actions,
                                       ).to("cpu")
-    weights = torch.load(logdir + "/checkpoints/ac_weights_040000.pt")
+    weights = torch.load(logdir + "/checkpoints/ac_weights_049999.pt")
     actor_critic.load_state_dict(state_dict=weights)
 
     policy = load_policy(logdir,actor_critic)
@@ -105,7 +105,7 @@ def play_go1(headless=True):
     import glob
     import os
 
-    label = "gait-conditioned-agility/2024-10-10/train"
+    label = "gait-conditioned-agility/2024-10-24/train"
 
     env, policy = load_env(label, headless=headless)
 
@@ -134,20 +134,20 @@ def play_go1(headless=True):
     joint_positions = np.zeros((num_eval_steps, 12))
 
     obs = env.reset()
-    print(obs)
+    # print(obs)
 
-    # for i in range(100):
-    #     actions = torch.zeros(1, 12)
-    #     env.env.p_gains = 80.0
-    #     env.env.d_gains = 4.0
-    #     obs, rew, done, info = env.step(actions)
+    for i in range(100):
+        actions = torch.zeros(1, 12)
+        env.env.p_gains = 40.0
+        env.env.d_gains = 2.0
+        obs, rew, done, info = env.step(actions)
 
     for i in tqdm(range(num_eval_steps)):
         with torch.no_grad():
             actions = policy(obs)
         # print(actions)
-        env.env.p_gains = 20.0
-        env.env.d_gains = 0.5
+        env.env.p_gains = 40.0
+        env.env.d_gains = 2.0
         env.commands[:, 0] = x_vel_cmd #*i/num_eval_steps
         env.commands[:, 1] = y_vel_cmd
         env.commands[:, 2] = yaw_vel_cmd

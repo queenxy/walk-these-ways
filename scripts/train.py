@@ -67,10 +67,10 @@ def train_go1(headless=True):
     Cfg.domain_rand.push_robots = False
     Cfg.domain_rand.max_push_vel_xy = 0.5
     Cfg.domain_rand.randomize_Kp_factor = True
-    Cfg.domain_rand.Kp_factor_range = [0.8, 1.3]
+    Cfg.domain_rand.Kp_factor_range = [0.9, 1.1]
     Cfg.env.priv_observe_Kp_factor = False
     Cfg.domain_rand.randomize_Kd_factor = True
-    Cfg.domain_rand.Kd_factor_range = [0.5, 1.5]
+    Cfg.domain_rand.Kd_factor_range = [0.8, 1.3]
     Cfg.env.priv_observe_Kd_factor = False
     Cfg.env.priv_observe_body_velocity = True
     Cfg.env.priv_observe_body_height = True
@@ -80,7 +80,7 @@ def train_go1(headless=True):
     Cfg.env.priv_observe_gravity_transformed_foot_displacement = False
 
     Cfg.env.num_privileged_obs = 6
-    Cfg.env.num_observation_history = 30
+    Cfg.env.num_observation_history = 15
     Cfg.reward_scales.feet_contact_forces = 0.0
 
     Cfg.domain_rand.rand_interval_s = 6
@@ -118,13 +118,15 @@ def train_go1(headless=True):
 
     Cfg.commands.resampling_time = 10
 
+    Cfg.reward_scales.tracking_lin_vel = 0.15
+    Cfg.reward_scales.tracking_ang_vel = 0.8
     Cfg.reward_scales.feet_slip = -0.04
     Cfg.reward_scales.action_smoothness_1 = -0.1
     Cfg.reward_scales.action_smoothness_2 = -0.1
     Cfg.reward_scales.dof_vel = -1e-4
     Cfg.reward_scales.dof_pos = -0.0
     Cfg.reward_scales.jump = 10.0
-    Cfg.reward_scales.base_height = 0.0
+    Cfg.reward_scales.base_height = -1e-3
     # Cfg.rewards.base_height_target = 0.38
     Cfg.reward_scales.estimation_bonus = 0.0
     Cfg.reward_scales.raibert_heuristic = -10.0
@@ -157,7 +159,7 @@ def train_go1(headless=True):
     Cfg.commands.lin_vel_x = [-1.0, 1.0]
     Cfg.commands.lin_vel_y = [-0.6, 0.6]
     Cfg.commands.ang_vel_yaw = [-1.0, 1.0]
-    Cfg.commands.body_height_cmd = [-0.15, 0.05]
+    Cfg.commands.body_height_cmd = [-0.10, 0.05]
     Cfg.commands.gait_frequency_cmd_range = [2.0, 4.0]
     Cfg.commands.gait_phase_cmd_range = [0.0, 1.0]
     Cfg.commands.gait_offset_cmd_range = [0.0, 1.0]
@@ -172,7 +174,7 @@ def train_go1(headless=True):
     Cfg.commands.limit_vel_x = [-5.0, 5.0]
     Cfg.commands.limit_vel_y = [-0.6, 0.6]
     Cfg.commands.limit_vel_yaw = [-5.0, 5.0]
-    Cfg.commands.limit_body_height = [-0.25, 0.15]
+    Cfg.commands.limit_body_height = [-0.15, 0.05]
     Cfg.commands.limit_gait_frequency = [2.0, 4.0]
     Cfg.commands.limit_gait_phase = [0.0, 1.0]
     Cfg.commands.limit_gait_offset = [0.0, 1.0]
@@ -217,7 +219,7 @@ def train_go1(headless=True):
     env = HistoryWrapper(env)
     gpu_id = 0
     runner = Runner(env, device=f"cuda:{gpu_id}")
-    runner.learn(num_learning_iterations=100000, init_at_random_ep_len=True, eval_freq=100)
+    runner.learn(num_learning_iterations=50000, init_at_random_ep_len=True, eval_freq=100)
 
 
 if __name__ == '__main__':

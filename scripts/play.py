@@ -23,13 +23,13 @@ def load_policy(logdir, actor_critic):
     adaptation_module = actor_critic.adaptation_module
     body = actor_critic.actor_body
 
-    # jit_adaptation_module = copy.deepcopy(adaptation_module).to('cpu')
-    # traced_script_adaptation_module = torch.jit.script(jit_adaptation_module)
-    # traced_script_adaptation_module.save("adaptation_module.jit")
+    jit_adaptation_module = copy.deepcopy(adaptation_module).to('cpu')
+    traced_script_adaptation_module = torch.jit.script(jit_adaptation_module)
+    traced_script_adaptation_module.save("adaptation_module_latest.jit")
 
-    # jit_body = copy.deepcopy(body).to('cpu')
-    # traced_script_body = torch.jit.script(jit_body)
-    # traced_script_body.save("body.jit")
+    jit_body = copy.deepcopy(body).to('cpu')
+    traced_script_body = torch.jit.script(jit_body)
+    traced_script_body.save("body_latest.jit")
 
     def policy(obs, info={}):
         i = 0
@@ -98,7 +98,7 @@ def load_env(label, headless=False):
                                       env.num_obs_history,
                                       env.num_actions,
                                       ).to("cpu")
-    weights = torch.load(logdir + "/checkpoints/ac_weights_049999.pt")
+    weights = torch.load(logdir + "/checkpoints/ac_weights_040000.pt")
     # weights = torch.load("pretrained/ac_weights_040000.pt")
     actor_critic.load_state_dict(state_dict=weights)
 

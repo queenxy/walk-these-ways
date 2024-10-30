@@ -71,7 +71,7 @@ def load_env(label, headless=False):
     Cfg.terrain.center_span = 1
     Cfg.terrain.teleport_robots = True
 
-    Cfg.domain_rand.lag_timesteps = 6
+    Cfg.domain_rand.lag_timesteps = 1
     Cfg.domain_rand.randomize_lag_timesteps = True
     Cfg.control.control_type = "P"
 
@@ -89,7 +89,7 @@ def load_env(label, headless=False):
                                       env.num_obs_history,
                                       env.num_actions,
                                       ).to("cpu")
-    weights = torch.load(logdir + "/checkpoints/ac_weights_002000.pt")
+    weights = torch.load(logdir + "/checkpoints/ac_weights_012800.pt")
     actor_critic.load_state_dict(state_dict=weights)
 
     policy = load_policy(logdir,actor_critic)
@@ -105,7 +105,7 @@ def play_go1(headless=True):
     import glob
     import os
 
-    label = "gait-conditioned-agility/2024-10-25/train"
+    label = "gait-conditioned-agility/2024-10-30/train"
 
     env, policy = load_env(label, headless=headless)
 
@@ -140,7 +140,7 @@ def play_go1(headless=True):
         # env.env.p_gains = 80.0
         # env.env.d_gains = 4.0
         obs, rew, done, info = env.step(actions)
-        print(env.root_states[0, 2])
+        # print(env.root_states[0, 2])
 
     for i in tqdm(range(num_eval_steps)):
         with torch.no_grad():

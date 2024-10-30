@@ -171,6 +171,7 @@ class LeggedRobot(BaseTask):
         self._call_train_eval(self._reset_root_states, env_ids)
 
         # reset buffers
+        self.actions[env_ids] = 0.
         self.last_actions[env_ids] = 0.
         self.last_last_actions[env_ids] = 0.
         self.last_dof_vel[env_ids] = 0.

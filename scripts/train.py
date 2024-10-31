@@ -28,7 +28,7 @@ def train_go1(headless=True):
 
     Cfg.commands.distributional_commands = True
 
-    Cfg.domain_rand.lag_timesteps = 6
+    Cfg.domain_rand.lag_timesteps = 1
     Cfg.domain_rand.randomize_lag_timesteps = True
     Cfg.control.control_type = "P"
 
@@ -145,8 +145,8 @@ def train_go1(headless=True):
     Cfg.rewards.kappa_gait_probs = 0.07
     Cfg.rewards.gait_force_sigma = 100.
     Cfg.rewards.gait_vel_sigma = 10.
-    Cfg.reward_scales.tracking_contacts_shaped_force = 4.0
-    Cfg.reward_scales.tracking_contacts_shaped_vel = 4.0
+    Cfg.reward_scales.tracking_contacts_shaped_force = 5.0
+    Cfg.reward_scales.tracking_contacts_shaped_vel = 5.0
     Cfg.reward_scales.collision = -5.0
 
     Cfg.rewards.reward_container_name = "CoRLRewards"
@@ -219,7 +219,7 @@ def train_go1(headless=True):
     env = HistoryWrapper(env)
     gpu_id = 0
     runner = Runner(env, device=f"cuda:{gpu_id}")
-    runner.learn(num_learning_iterations=50000, init_at_random_ep_len=True, eval_freq=100)
+    runner.learn(num_learning_iterations=50000, init_at_random_ep_len=True, eval_freq=500)
 
 
 if __name__ == '__main__':

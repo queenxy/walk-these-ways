@@ -80,7 +80,7 @@ def load_env(label, headless=False):
     Cfg.terrain.center_span = 1
     Cfg.terrain.teleport_robots = True
 
-    Cfg.domain_rand.lag_timesteps = 6
+    Cfg.domain_rand.lag_timesteps = 1
     Cfg.domain_rand.randomize_lag_timesteps = True
     Cfg.control.control_type = "P"
 
@@ -115,7 +115,7 @@ def play_go1(headless=True):
     import glob
     import os
 
-    label = "gait-conditioned-agility/2024-10-25/train"
+    label = "gait-conditioned-agility/2024-10-30/train"
 
     env, policy = load_env(label, headless=headless)
 
@@ -148,16 +148,16 @@ def play_go1(headless=True):
 
     for i in range(100):
         actions = torch.zeros(1, 12)
-        env.env.p_gains = 40.0
-        env.env.d_gains = 2.0
+        # env.env.p_gains = 80.0
+        # env.env.d_gains = 4.0
         obs, rew, done, info = env.step(actions)
+        # print(env.root_states[0, 2])
 
     for i in tqdm(range(num_eval_steps)):
         with torch.no_grad():
             actions = policy(obs)
-        # print(actions)
-        env.env.p_gains = 40.0
-        env.env.d_gains = 2.0
+        # env.env.p_gains = 20.0
+        # env.env.d_gains = 0.5
         env.commands[:, 0] = x_vel_cmd #*i/num_eval_steps
         env.commands[:, 1] = y_vel_cmd
         env.commands[:, 2] = yaw_vel_cmd

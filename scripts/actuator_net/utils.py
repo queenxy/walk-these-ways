@@ -90,7 +90,7 @@ def train_actuator_network(xs, ys, actuator_network_path):
 
     model = build_mlp(in_dim=6, units=32, layers=2, out_dim=1, act='softsign')
 
-    lr = 8e-4
+    lr = 3e-3
     opt = Adam(model.parameters(), lr=lr, eps=1e-8, weight_decay=0.0)
 
     epochs = 100
@@ -145,35 +145,19 @@ def train_actuator_network(xs, ys, actuator_network_path):
         model_scripted.save(actuator_network_path)  # Save
     return model
 
-def train_actuator_network_and_plot_predictions(log_dir_root, log_dir, actuator_network_path, load_pretrained_model=False):
+def train_actuator_network_and_plot_predictions(data_path, actuator_network_path, load_pretrained_model=False):
 
-    log_path = log_dir_root + log_dir + "log.pkl"
-    print(log_path)
-    with open(log_path, 'rb') as file:
-        data = pkl.load(file)
+    data = np.load(data_path)
 
-    datas = data['hardware_closed_loop'][1]
+    tau_ests = data['tau_est'].reshape(-1, 12)
+    print(tau_ests[10])
+    torques = data['torques'].reshape(-1, 12)
+    joint_positions = data['dof_pos'].reshape(-1, 12)
+    joint_velocities = data['dof_vel'].reshape(-1, 12)
+    joint_position_targets = data['pos_targets'].reshape(-1, 12)
+    print(tau_ests.shape, torques.shape, joint_positions.shape, joint_velocities.shape, joint_position_targets.shape)
 
-    if len(datas) < 1:
-        return
-
-    tau_ests = np.zeros((len(datas), 12))
-    torques = np.zeros((len(datas), 12))
-    joint_positions = np.zeros((len(datas), 12))
-    joint_position_targets = np.zeros((len(datas), 12))
-    joint_velocities = np.zeros((len(datas), 12))
-
-    if "tau_est" not in datas[0].keys():
-        return
-
-    for i in range(len(datas)):
-        tau_ests[i, :] = datas[i]["tau_est"]
-        torques[i, :] = datas[i]["torques"]
-        joint_positions[i, :] = datas[i]["joint_pos"]
-        joint_position_targets[i, :] = datas[i]["joint_pos_target"]
-        joint_velocities[i, :] = datas[i]["joint_vel"]
-
-    timesteps = np.array(range(len(datas))) / 50.0
+    timesteps = np.array(range(len(tau_ests))) / 50.0
 
     import matplotlib.pyplot as plt
 

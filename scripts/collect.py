@@ -27,7 +27,7 @@ def load_policy(logdir, actor_critic):
         latent = adaptation_module.forward(obs["obs_history"].to('cpu'))
         action = body.forward(torch.cat((obs["obs_history"].to('cpu'), latent), dim=-1))
         info['latent'] = latent
-        return action
+        return action, info
 
     return policy
 
@@ -63,7 +63,7 @@ def load_env(label, headless=False):
     Cfg.domain_rand.randomize_com_displacement = True
 
     Cfg.env.num_recording_envs = 1
-    Cfg.env.num_envs = 16
+    Cfg.env.num_envs = 32
     Cfg.terrain.num_rows = 5
     Cfg.terrain.num_cols = 5
     Cfg.terrain.border_size = 100
@@ -72,7 +72,7 @@ def load_env(label, headless=False):
     Cfg.terrain.teleport_robots = True
     Cfg.terrain.teleport_thresh = 50.0
 
-    Cfg.domain_rand.lag_timesteps = 6
+    Cfg.domain_rand.lag_timesteps = 1
     Cfg.domain_rand.randomize_lag_timesteps = True
     Cfg.control.control_type = "P"
     Cfg.env.episode_length_s = 10        # max episode length is episode_length_s / control_dt, 500 steps when episode_length_s = 10
@@ -91,7 +91,7 @@ def load_env(label, headless=False):
                                       env.num_obs_history,
                                       env.num_actions,
                                       ).to("cpu")
-    weights = torch.load(logdir + "/checkpoints/ac_weights_040000.pt")
+    weights = torch.load(logdir + "/checkpoints/ac_weights_028000.pt")
     actor_critic.load_state_dict(state_dict=weights)
 
     policy = load_policy(logdir,actor_critic)
@@ -107,12 +107,12 @@ def play_go1(headless=True):
     import glob
     import os
 
-    label = "gait-conditioned-agility/2024-10-10/train"
+    label = "gait-conditioned-agility/2024-10-30/train"
 
     env, policy = load_env(label, headless=headless)
 
-    num_eval_steps = 5000
-    num_envs = 16
+    num_eval_steps = 10000
+    num_envs = 32
     gaits = {"pronking": [0, 0, 0],
              "trotting": [0.5, 0, 0],
              "bounding": [0, 0.5, 0],
@@ -121,7 +121,7 @@ def play_go1(headless=True):
     x_vel_cmd, y_vel_cmd, yaw_vel_cmd = 1.5, 0.0, 0.0
     body_height_cmd = 0.0
     step_frequency_cmd = 3.0
-    gait = torch.tensor(gaits["trotting"])
+    gait = torch.tensor(gaits["bounding"])
     footswing_height_cmd = 0.08
     pitch_cmd = 0.0
     roll_cmd = 0.0
@@ -133,12 +133,14 @@ def play_go1(headless=True):
     action_buf = np.zeros((num_eval_steps,num_envs, 12))
     rew_buf = np.zeros((num_eval_steps, num_envs, 1))
     done_buf = np.zeros((num_eval_steps, num_envs, 1))
+    latent_buf = np.zeros((num_eval_steps, num_envs, 6))
 
     for i in tqdm(range(num_eval_steps)):
         obs_buf[i,:,:] = obs["obs_history"].cpu().numpy()
         with torch.no_grad():
-            actions = policy(obs)
+            actions, info = policy(obs)
         action_buf[i,:,:] = actions.cpu().numpy()
+        latent_buf[i,:,:] = info['latent'].cpu().numpy()
         env.commands[:, 0] = x_vel_cmd #*i/num_eval_steps
         env.commands[:, 1] = y_vel_cmd
         env.commands[:, 2] = yaw_vel_cmd
@@ -154,7 +156,7 @@ def play_go1(headless=True):
         rew_buf[i,:,:] = rew.reshape(-1,1).cpu().numpy()
         done_buf[i,:,:] = done.long().reshape(-1,1).cpu().numpy()
 
-    np.savez("trotting.npz",states=obs_buf,actions=action_buf,rews=rew_buf,dones=done_buf)
+    np.savez("bounding.npz",states=obs_buf,actions=action_buf,rews=rew_buf,dones=done_buf,latent=latent_buf)
 
 
 

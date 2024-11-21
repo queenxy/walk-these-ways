@@ -1099,6 +1099,11 @@ class LeggedRobot(BaseTask):
                                    torch.ones(3) * noise_scales.ang_vel * noise_level * self.obs_scales.ang_vel,
                                    noise_vec
                                    ), dim=0)
+            
+        if self.cfg.env.observe_only_ang_vel:
+            noise_vec = torch.cat((torch.ones(3) * noise_scales.ang_vel * noise_level * self.obs_scales.ang_vel,
+                                   noise_vec
+                                   ), dim=0)
 
         if self.cfg.env.observe_only_lin_vel:
             noise_vec = torch.cat((torch.ones(3) * noise_scales.lin_vel * noise_level * self.obs_scales.lin_vel,
@@ -1237,7 +1242,7 @@ class LeggedRobot(BaseTask):
         self.default_dof_pos = self.default_dof_pos.unsqueeze(0)
 
         if self.cfg.control.control_type == "actuator_net":
-            actuator_path = f'{os.path.dirname(os.path.dirname(os.path.realpath(__file__)))}/../../resources/actuator_nets/unitree_go1.pt'
+            actuator_path = '/home/qxy/walk-these-ways/aliengo_actuator.pt'
             actuator_network = torch.jit.load(actuator_path).to(self.device)
 
             def eval_actuator_network(joint_pos, joint_pos_last, joint_pos_last_last, joint_vel, joint_vel_last,

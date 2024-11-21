@@ -12,6 +12,8 @@ runs
 node_modules/
 dist/
 
+*.pt
+
 # Compiled Java class files
 *.class
 

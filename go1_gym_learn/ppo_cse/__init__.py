@@ -48,14 +48,14 @@ class RunnerArgs(PrefixProto, cli=False):
 
     # logging
     save_interval = 400  # check for potential saves every this many iterations
-    save_video_interval = 100
-    log_freq = 10
+    save_video_interval = 1000
+    log_freq = 100
 
     # load and resume
     resume = False
     load_run = -1  # -1 = last run
     checkpoint = -1  # -1 = last saved model
-    resume_path = None  # updated from load_run and chkpt
+    resume_path = "/home/qxy/walk-these-ways/runs/gait-conditioned-agility/2024-10-30/train/025524.117946/checkpoints/ac_weights_028000.pt"  # updated from load_run and chkpt
     resume_curriculum = True
 
 
@@ -75,20 +75,20 @@ class Runner:
 
         if RunnerArgs.resume:
             # load pretrained weights from resume_path
-            from ml_logger import ML_Logger
-            loader = ML_Logger(root="http://escher.csail.mit.edu:8080",
-                               prefix=RunnerArgs.resume_path)
-            weights = loader.load_torch("checkpoints/ac_weights_last.pt")
+            # from ml_logger import ML_Logger
+            # loader = ML_Logger(root="http://escher.csail.mit.edu:8080",
+            #                    prefix=RunnerArgs.resume_path)
+            weights = torch.load(RunnerArgs.resume_path)
             actor_critic.load_state_dict(state_dict=weights)
 
-            if hasattr(self.env, "curricula") and RunnerArgs.resume_curriculum:
-                # load curriculum state
-                distributions = loader.load_pkl("curriculum/distribution.pkl")
-                distribution_last = distributions[-1]["distribution"]
-                gait_names = [key[8:] if key.startswith("weights_") else None for key in distribution_last.keys()]
-                for gait_id, gait_name in enumerate(self.env.category_names):
-                    self.env.curricula[gait_id].weights = distribution_last[f"weights_{gait_name}"]
-                    print(gait_name)
+            # if hasattr(self.env, "curricula") and RunnerArgs.resume_curriculum:
+            #     # load curriculum state
+            #     distributions = loader.load_pkl("curriculum/distribution.pkl")
+            #     distribution_last = distributions[-1]["distribution"]
+            #     gait_names = [key[8:] if key.startswith("weights_") else None for key in distribution_last.keys()]
+            #     for gait_id, gait_name in enumerate(self.env.category_names):
+            #         self.env.curricula[gait_id].weights = distribution_last[f"weights_{gait_name}"]
+            #         print(gait_name)
 
         self.alg = PPO(actor_critic, device=self.device)
         self.num_steps_per_env = RunnerArgs.num_steps_per_env

@@ -118,7 +118,8 @@ class LeggedRobot(BaseTask):
 
         # compute observations, rewards, resets, ...
         self.check_termination()
-        self.compute_reward()
+        self.rew_buf = 1.1 * self.time_out_buf.float() - 0.1 * self.reset_buf.float()
+        # self.compute_reward()
         env_ids = self.reset_buf.nonzero(as_tuple=False).flatten()
         self.reset_idx(env_ids)
         self.compute_observations()
@@ -307,7 +308,9 @@ class LeggedRobot(BaseTask):
                                   (self.dof_pos[:, :self.num_actuated_dof] - self.default_dof_pos[:,
                                                                              :self.num_actuated_dof]) * self.obs_scales.dof_pos,
                                   self.dof_vel[:, :self.num_actuated_dof] * self.obs_scales.dof_vel,
-                                  self.actions
+                                  self.actions * 10,
+                                  self.commands[:,0:3] * self.commands_scale[0:3],
+                                  self.gait
                                   ), dim=-1)
         # if self.cfg.env.observe_command and not self.cfg.env.observe_height_command:
         #     self.obs_buf = torch.cat((self.projected_gravity,
@@ -317,26 +320,26 @@ class LeggedRobot(BaseTask):
         #                               self.actions
         #                               ), dim=-1)
 
-        if self.cfg.env.observe_command:
-            self.obs_buf = torch.cat((self.projected_gravity,
-                                      self.commands * self.commands_scale,
-                                      (self.dof_pos[:, :self.num_actuated_dof] - self.default_dof_pos[:,
-                                                                                 :self.num_actuated_dof]) * self.obs_scales.dof_pos,
-                                      self.dof_vel[:, :self.num_actuated_dof] * self.obs_scales.dof_vel,
-                                      self.actions
-                                      ), dim=-1)
+        # if self.cfg.env.observe_command:
+        #     self.obs_buf = torch.cat((self.projected_gravity,
+        #                               self.commands * self.commands_scale,
+        #                               (self.dof_pos[:, :self.num_actuated_dof] - self.default_dof_pos[:,
+        #                                                                          :self.num_actuated_dof]) * self.obs_scales.dof_pos,
+        #                               self.dof_vel[:, :self.num_actuated_dof] * self.obs_scales.dof_vel,
+        #                               self.actions
+        #                               ), dim=-1)
 
-        if self.cfg.env.observe_two_prev_actions:
-            self.obs_buf = torch.cat((self.obs_buf,
-                                      self.last_actions), dim=-1)
+        # if self.cfg.env.observe_two_prev_actions:
+        #     self.obs_buf = torch.cat((self.obs_buf,
+        #                               self.last_actions), dim=-1)
 
-        if self.cfg.env.observe_timing_parameter:
-            self.obs_buf = torch.cat((self.obs_buf,
-                                      self.gait_indices.unsqueeze(1)), dim=-1)
+        # if self.cfg.env.observe_timing_parameter:
+        #     self.obs_buf = torch.cat((self.obs_buf,
+        #                               self.gait_indices.unsqueeze(1)), dim=-1)
 
-        if self.cfg.env.observe_clock_inputs:
-            self.obs_buf = torch.cat((self.obs_buf,
-                                      self.clock_inputs), dim=-1)
+        # if self.cfg.env.observe_clock_inputs:
+        #     self.obs_buf = torch.cat((self.obs_buf,
+        #                               self.clock_inputs), dim=-1)
 
         # if self.cfg.env.observe_desired_contact_states:
         #     self.obs_buf = torch.cat((self.obs_buf,
@@ -765,18 +768,22 @@ class LeggedRobot(BaseTask):
             if self.cfg.commands.gaitwise_curricula:
                 for i, (category, env_ids_in_category) in enumerate(zip(self.category_names, category_env_ids)):
                     if category == "pronk":  # pronking
+                        self.gait = torch.tensor([0, 0, 0, 1], dtype=torch.float, device=self.device)
                         self.commands[env_ids_in_category, 5] = (self.commands[env_ids_in_category, 5] / 2 - 0.25) % 1
                         self.commands[env_ids_in_category, 6] = (self.commands[env_ids_in_category, 6] / 2 - 0.25) % 1
                         self.commands[env_ids_in_category, 7] = (self.commands[env_ids_in_category, 7] / 2 - 0.25) % 1
                     elif category == "trot":  # trotting
+                        self.gait = torch.tensor([1, 0, 0, 0], dtype=torch.float, device=self.device)
                         self.commands[env_ids_in_category, 5] = self.commands[env_ids_in_category, 5] / 2 + 0.25
                         self.commands[env_ids_in_category, 6] = 0
                         self.commands[env_ids_in_category, 7] = 0
                     elif category == "pace":  # pacing
+                        self.gait = torch.tensor([0, 0, 1, 0], dtype=torch.float, device=self.device)
                         self.commands[env_ids_in_category, 5] = 0
                         self.commands[env_ids_in_category, 6] = self.commands[env_ids_in_category, 6] / 2 + 0.25
                         self.commands[env_ids_in_category, 7] = 0
                     elif category == "bound":  # bounding
+                        self.gait = torch.tensor([0, 1, 0, 0], dtype=torch.float, device=self.device)
                         self.commands[env_ids_in_category, 5] = 0
                         self.commands[env_ids_in_category, 6] = 0
                         self.commands[env_ids_in_category, 7] = self.commands[env_ids_in_category, 7] / 2 + 0.25

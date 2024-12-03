@@ -43,13 +43,13 @@ def config_aliengo(Cnfg: Union[Cfg, Meta]):
 
     # Environmental settings
     Cnfg.env.num_envs = 4000
-    Cnfg.env.num_observations = 70
-    Cnfg.env.num_scalar_observations = 70
+    Cnfg.env.num_observations = 73
+    Cnfg.env.num_scalar_observations = 73
     Cnfg.env.num_privileged_obs = 6
     Cnfg.env.num_observation_history = 30
     Cnfg.env.observe_two_prev_actions = True
     Cnfg.env.observe_yaw = False
-    Cnfg.env.observe_only_ang_vel = False
+    Cnfg.env.observe_only_ang_vel = True
     Cnfg.env.observe_vel = False
     Cnfg.env.observe_gait_commands = True
     Cnfg.env.observe_timing_parameter = False
@@ -142,6 +142,7 @@ def config_aliengo(Cnfg: Union[Cfg, Meta]):
     Cnfg.reward_scales.action_rate = -0.01
     Cnfg.reward_scales.dof_pos_limits = -10.0
 
+    Cnfg.obs_scales.ang_vel = 2.0
 
     # Terrain settings
     Cnfg.terrain.border_size = 0.0

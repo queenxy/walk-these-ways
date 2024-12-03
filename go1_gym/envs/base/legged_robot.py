@@ -353,7 +353,8 @@ class LeggedRobot(BaseTask):
                                           self.obs_buf), dim=-1)
 
         if self.cfg.env.observe_only_ang_vel:
-            self.obs_buf = torch.cat((self.base_ang_vel * self.obs_scales.ang_vel,
+            self.obs_buf = torch.cat((self.base_ang_vel * torch.tensor([self.obs_scales.ang_vel/10, self.obs_scales.ang_vel/10, self.obs_scales.ang_vel],
+                                                                       device=self.device, requires_grad=False),
                                       self.obs_buf), dim=-1)
 
         if self.cfg.env.observe_only_lin_vel:

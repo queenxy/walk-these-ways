@@ -63,7 +63,7 @@ def load_env(label, headless=False):
     Cfg.domain_rand.randomize_com_displacement = True
 
     Cfg.env.num_recording_envs = 1
-    Cfg.env.num_envs = 32
+    Cfg.env.num_envs = 128
     Cfg.terrain.num_rows = 5
     Cfg.terrain.num_cols = 5
     Cfg.terrain.border_size = 100
@@ -91,7 +91,7 @@ def load_env(label, headless=False):
                                       env.num_obs_history,
                                       env.num_actions,
                                       ).to("cpu")
-    weights = torch.load(logdir + "/checkpoints/ac_weights_049999.pt")
+    weights = torch.load(logdir + "/checkpoints/ac_weights_080000.pt")
     actor_critic.load_state_dict(state_dict=weights)
 
     policy = load_policy(logdir,actor_critic)
@@ -107,12 +107,12 @@ def play_go1(headless=True):
     import glob
     import os
 
-    label = "gait-conditioned-agility/2024-11-22/train"
+    label = "gait-conditioned-agility/2024-12-03/train"
 
     env, policy = load_env(label, headless=headless)
 
-    num_eval_steps = 10000
-    num_envs = 32
+    num_eval_steps = 20000
+    num_envs = 128
     gaits = {"pronking": [0, 0, 0],
              "trotting": [0.5, 0, 0],
              "bounding": [0, 0.5, 0],

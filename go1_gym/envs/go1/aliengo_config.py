@@ -49,7 +49,7 @@ def config_aliengo(Cnfg: Union[Cfg, Meta]):
     Cnfg.env.num_observation_history = 30
     Cnfg.env.observe_two_prev_actions = True
     Cnfg.env.observe_yaw = False
-    Cnfg.env.observe_only_ang_vel = False
+    Cnfg.env.observe_only_ang_vel = True
     Cnfg.env.observe_vel = False
     Cnfg.env.observe_gait_commands = True
     Cnfg.env.observe_timing_parameter = False

@@ -12,15 +12,15 @@ class CoRLRewards:
         self.env = env
 
     # ------------ reward functions----------------
-    # def _reward_tracking_lin_vel(self):
-    #     # Tracking of linear velocity commands (xy axes)
-    #     lin_vel_error = torch.sum(torch.square(self.env.commands[:, :2] - self.env.base_lin_vel[:, :2]), dim=1)
-    #     return torch.exp(-lin_vel_error / self.env.cfg.rewards.tracking_sigma)
+    def _reward_tracking_lin_vel(self):
+        # Tracking of linear velocity commands (xy axes)
+        lin_vel_error = torch.sum(torch.square(self.env.commands[:, :2] - self.env.base_lin_vel[:, :2]), dim=1)
+        return torch.exp(-lin_vel_error / self.env.cfg.rewards.tracking_sigma)
 
-    # def _reward_tracking_ang_vel(self):
-    #     # Tracking of angular velocity commands (yaw)
-    #     ang_vel_error = torch.square(self.env.commands[:, 2] - self.env.base_ang_vel[:, 2])
-    #     return torch.exp(-ang_vel_error / self.env.cfg.rewards.tracking_sigma_yaw)
+    def _reward_tracking_ang_vel(self):
+        # Tracking of angular velocity commands (yaw)
+        ang_vel_error = torch.square(self.env.commands[:, 2] - self.env.base_ang_vel[:, 2])
+        return torch.exp(-ang_vel_error / self.env.cfg.rewards.tracking_sigma_yaw)
 
     # def _reward_lin_vel_z(self):
     #     # Penalize z axis base linear velocity
@@ -46,10 +46,10 @@ class CoRLRewards:
     #     # Penalize changes in actions
     #     return torch.sum(torch.square(self.env.last_actions - self.env.actions), dim=1)
 
-    def _reward_collision(self):
-        # Penalize collisions on selected bodies
-        return torch.sum(1. * (torch.norm(self.env.contact_forces[:, self.env.penalised_contact_indices, :], dim=-1) > 0.1),
-                         dim=1)
+    # def _reward_collision(self):
+    #     # Penalize collisions on selected bodies
+    #     return torch.sum(1. * (torch.norm(self.env.contact_forces[:, self.env.penalised_contact_indices, :], dim=-1) > 0.1),
+    #                      dim=1)
 
     # def _reward_dof_pos_limits(self):
     #     # Penalize dof positions too close to the limit
